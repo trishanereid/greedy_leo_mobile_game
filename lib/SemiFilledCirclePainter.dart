@@ -8,10 +8,12 @@ class SemiFilledCirclePainter extends CustomPainter {
 
     final gradient = RadialGradient(
       colors: [
-        Color(0xFF777777),
-        Color(0xFF696969),
+        Colors.purple.shade300,
+        Colors.purple.shade600,
+        // Color(0xFF777777),
+        // Color(0xFF696969),
       ],
-      stops: [0.5, 0.8],
+      stops: [0.3, 0.9],
     );
 
     final whiteCirclePaint = Paint()

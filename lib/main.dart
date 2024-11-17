@@ -61,7 +61,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFF1a2635), Color(0xFF0d1219)],
+            colors: [
+              Color(0xFF1a2635),
+              Color(0xFF0d1219)],
           ),
         ),
         child: SafeArea(
@@ -86,7 +88,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -208,7 +210,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: isSelected
-              ? [Colors.red, Colors.red]
+              ? [Colors.lightGreenAccent.shade200, Colors.lightGreenAccent.shade400]
               : [Colors.blue.shade600, Colors.blue.shade300],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -216,7 +218,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         boxShadow: [
           BoxShadow(
             color: isSelected
-                ? Colors.red.shade900
+                ? Colors.green.shade500
                 : Colors.blue.shade800,
             blurRadius: 0,
             spreadRadius: 1,
@@ -245,7 +247,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                 label,
                 style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
                   color: Colors.white,
                 ),
               ),
@@ -285,7 +287,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ),
             Text(
               '$amount',
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 16,
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -349,9 +351,17 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   Widget _buildBalanceRow() {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 20),
-      decoration: const BoxDecoration(
-        color: Colors.blueAccent,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.lightBlueAccent,
+            Colors.lightBlueAccent.shade400,
+            Colors.lightBlueAccent.shade700,
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(30),
           bottomLeft: Radius.circular(0),
           topRight: Radius.circular(30),
@@ -397,7 +407,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         ],
       ),
     );
-
   }
 
   Widget _buildBalanceDisplay(String label, int amount) {
