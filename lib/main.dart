@@ -23,15 +23,28 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
 
   final List<Map<String, String>> foodItems = [
-    {'image': 'assets/food1.png', 'label': 'Pizza'},
-    {'image': 'assets/food2.png', 'label': 'Burger'},
-    {'image': 'assets/food3.png', 'label': 'Sushi'},
-    {'image': 'assets/food4.png', 'label': 'Fries'},
-    {'image': 'assets/food5.png', 'label': 'Salad'},
-    {'image': 'assets/food6.png', 'label': 'Tacos'},
-    {'image': 'assets/food7.png', 'label': 'Ice Cream'},
-    {'image': 'assets/food8.png', 'label': 'Hot Dog'},
+    {'image': 'assets/beef.png', 'label': '45x'},
+    {'image': 'assets/cabbage.png', 'label': '5x'},
+    {'image': 'assets/carrot.png', 'label': '5x'},
+    {'image': 'assets/corn.png', 'label': '5x'},
+    {'image': 'assets/hot-dog.png', 'label': '15x'},
+    {'image': 'assets/leg-piece.png', 'label': '25x'},
+    {'image': 'assets/tomato.png', 'label': '5x'},
+    {'image': 'assets/tuna.png', 'label': '10x'},
   ];
+
+  Set<int> selectedCircles = {};
+
+  // Method to toggle circle selection
+  void toggleSelection(int index) {
+    setState(() {
+      if (selectedCircles.contains(index)) {
+        selectedCircles.remove(index);
+      } else if (selectedCircles.length < 6) {
+        selectedCircles.add(index);
+      }
+    });
+  }
 
 
   @override
@@ -73,7 +86,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -125,23 +138,27 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           const Image(
               image: AssetImage('assets/stand-without-circles.png'),
               width: 350,
-              height: 450,
+              height: 525,
               fit: BoxFit.contain,
           ),
 
           for (int i = 0; i < foodItems.length; i++)
             Positioned(
-              left: 135 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.1,
-              top: 90 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.1,
-              child: _semiFilledCircle(
-                size: 80,
-                image: foodItems[i]['image']!,
-                label: foodItems[i]['label']!,
+              left: 135 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.15,
+              top: 130 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.15,
+              child: GestureDetector(
+                onTap: () => toggleSelection(i),
+                child: _semiFilledCircle(
+                  size: 80,
+                  image: foodItems[i]['image']!,
+                  label: foodItems[i]['label']!,
+                  isSelected: selectedCircles.contains(i),
+                ),
               ),
             ),
 
           Positioned(
-              bottom: 18,
+              bottom: 55,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -153,28 +170,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       ),
     );
   }
-
-  // Widget _buildFoodItem(FoodItem item) {
-  //   return Container(
-  //     width: 80,
-  //     height: 80,
-  //     decoration: const BoxDecoration(
-  //       color: Colors.orange,
-  //       shape: BoxShape.circle,
-  //     ),
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Icon(Icons.fastfood, color: Colors.white),
-  //         SizedBox(height: 4),
-  //         Text(
-  //           '${item.multiplier}X',
-  //           style: TextStyle(color: Colors.white, fontSize: 14),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildBetSelector() {
     return Container(
@@ -204,6 +199,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     required double size,
     required String image,
     required String label,
+    required bool isSelected,
   }) {
     return Container(
       width: size,
@@ -211,13 +207,17 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade300],
+          colors: isSelected
+              ? [Colors.red, Colors.red]
+              : [Colors.blue.shade600, Colors.blue.shade300],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.shade800,
+            color: isSelected
+                ? Colors.red.shade900
+                : Colors.blue.shade800,
             blurRadius: 0,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -226,6 +226,32 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       ),
       child: CustomPaint(
         painter: SemiFilledCirclePainter(),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              top: 15,
+              child: Image.asset(
+                image,
+                width: 37,
+                height: 37,
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            Positioned(
+              bottom: 9,
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +266,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-            color: selectedBet == amount ? Colors.red.shade900 : Colors.blue.shade500.withOpacity(0.6),
+            color: selectedBet == amount
+                ? Colors.red.shade900
+                : Colors.blue.shade500.withOpacity(0.6),
             blurRadius: 0,
             spreadRadius: 1,
             offset: Offset(0, 4),

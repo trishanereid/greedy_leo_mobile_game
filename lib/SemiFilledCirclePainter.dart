@@ -6,8 +6,20 @@ class SemiFilledCirclePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 5;
 
-    // Draw the white background circle
-    final whiteCirclePaint = Paint()..color = Colors.white;
+    final gradient = RadialGradient(
+      colors: [
+        Color(0xFF777777),
+        Color(0xFF696969),
+      ],
+      stops: [0.5, 0.8],
+    );
+
+    final whiteCirclePaint = Paint()
+      ..shader = gradient.createShader(Rect.fromCircle(
+          center: center,
+          radius: radius)
+      );
+
     canvas.drawCircle(center, radius, whiteCirclePaint);
   }
 
