@@ -1,5 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'FoodItem.dart';
+import 'SemiFilledCirclePainter.dart';
 
 void main() {
   runApp(
@@ -20,16 +21,18 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int balance = 1000;
   int winAmount = 10000;
 
-  final List<FoodItem> foodItems = [
-    FoodItem('Meat', 45),
-    FoodItem('Tomato', 5),
-    FoodItem('Pepper', 5),
-    FoodItem('Ham', 25),
-    FoodItem('Carrot', 5),
-    FoodItem('Hot Dog', 15),
-    FoodItem('Fish', 10),
-    FoodItem('Cabbage', 5),
+
+  final List<Map<String, String>> foodItems = [
+    {'image': 'assets/food1.png', 'label': 'Pizza'},
+    {'image': 'assets/food2.png', 'label': 'Burger'},
+    {'image': 'assets/food3.png', 'label': 'Sushi'},
+    {'image': 'assets/food4.png', 'label': 'Fries'},
+    {'image': 'assets/food5.png', 'label': 'Salad'},
+    {'image': 'assets/food6.png', 'label': 'Tacos'},
+    {'image': 'assets/food7.png', 'label': 'Ice Cream'},
+    {'image': 'assets/food8.png', 'label': 'Hot Dog'},
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +60,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildFoodWheel(),
-
-                    //_buildResultRow(),
                   ],
                 ),
               ),
@@ -72,7 +73,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -128,12 +129,23 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               fit: BoxFit.contain,
           ),
 
+          for (int i = 0; i < foodItems.length; i++)
+            Positioned(
+              left: 135 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.1,
+              top: 90 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.1,
+              child: _semiFilledCircle(
+                size: 80,
+                image: foodItems[i]['image']!,
+                label: foodItems[i]['label']!,
+              ),
+            ),
+
           Positioned(
               bottom: 18,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildBetSelector()
+                  _buildBetSelector(),
                 ],
               )
           )
@@ -142,27 +154,27 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     );
   }
 
-  Widget _buildFoodItem(FoodItem item) {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: const BoxDecoration(
-        color: Colors.orange,
-        shape: BoxShape.circle,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.fastfood, color: Colors.white),
-          SizedBox(height: 4),
-          Text(
-            '${item.multiplier}X',
-            style: TextStyle(color: Colors.white, fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildFoodItem(FoodItem item) {
+  //   return Container(
+  //     width: 80,
+  //     height: 80,
+  //     decoration: const BoxDecoration(
+  //       color: Colors.orange,
+  //       shape: BoxShape.circle,
+  //     ),
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.center,
+  //       children: [
+  //         Icon(Icons.fastfood, color: Colors.white),
+  //         SizedBox(height: 4),
+  //         Text(
+  //           '${item.multiplier}X',
+  //           style: TextStyle(color: Colors.white, fontSize: 14),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildBetSelector() {
     return Container(
@@ -183,6 +195,37 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             }).toList(),
           ),
         ],
+      ),
+    );
+  }
+
+  // food circle
+  Widget _semiFilledCircle({
+    required double size,
+    required String image,
+    required String label,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade600, Colors.blue.shade300],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade800,
+            blurRadius: 0,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
+          )
+        ]
+      ),
+      child: CustomPaint(
+        painter: SemiFilledCirclePainter(),
       ),
     );
   }
