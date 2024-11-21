@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'SemiFilledCirclePainter.dart';
@@ -21,16 +22,21 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int balance = 1000;
   int winAmount = 10000;
 
+  int currentCircleIndex = 0;
+  Timer? handTimer;
+  bool isHandMoving = false;
+
+
 
   final List<Map<String, String>> foodItems = [
-    {'image': 'assets/beef.png', 'label': '45x'},
-    {'image': 'assets/cabbage.png', 'label': '5x'},
-    {'image': 'assets/carrot.png', 'label': '5x'},
-    {'image': 'assets/corn.png', 'label': '5x'},
-    {'image': 'assets/hot-dog.png', 'label': '15x'},
-    {'image': 'assets/leg-piece.png', 'label': '25x'},
-    {'image': 'assets/tomato.png', 'label': '5x'},
-    {'image': 'assets/tuna.png', 'label': '10x'},
+    {'image': 'assets/leg-piece.png', 'label': '25 Times'},
+    {'image': 'assets/tuna.png', 'label': '15 Times'},
+    {'image': 'assets/hot-dog.png', 'label': '10 Times'},
+    {'image': 'assets/tomato.png', 'label': '5 Times'},
+    {'image': 'assets/cabbage.png', 'label': '5 Times'},
+    {'image': 'assets/corn.png', 'label': '5 Times'},
+    {'image': 'assets/carrot.png', 'label': '5 Times'},
+    {'image': 'assets/beef.png', 'label': '45 Times'},
   ];
 
   Set<int> selectedCircles = {};
@@ -44,6 +50,39 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         selectedCircles.add(index);
       }
     });
+  }
+
+  void startHandMovement() {
+    if (isHandMoving) return;
+    setState(() {
+      isHandMoving = true;
+    });
+
+    handTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        currentCircleIndex = (currentCircleIndex + 1) % foodItems.length;
+      });
+
+      // Stop after 30 seconds
+      if (timer.tick >= 30) {
+        timer.cancel();
+        setState(() {
+          isHandMoving = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    handTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    startHandMovement(); // Trigger hand movement when the app starts
   }
 
 
@@ -72,9 +111,10 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               _buildTopBar(),
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildFoodWheel(),
+                    _buildResultRow()
                   ],
                 ),
               ),
@@ -88,7 +128,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -101,7 +141,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           ),
 
           const Text(
-            'GREEDY LEO',
+            'GREEDYLEO',
             style: TextStyle(
               color: Colors.white,
               fontSize: 24,
@@ -139,23 +179,34 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         children: [
           const Image(
               image: AssetImage('assets/stand-without-circles.png'),
-              width: 350,
-              height: 525,
+              width: 360,
+              height: 535,
               fit: BoxFit.contain,
           ),
 
           for (int i = 0; i < foodItems.length; i++)
             Positioned(
-              left: 135 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.15,
-              top: 130 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.15,
+              left: 138 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.15,
+              top: 128 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.15,
               child: GestureDetector(
                 onTap: () => toggleSelection(i),
                 child: _semiFilledCircle(
-                  size: 80,
+                  size: 82,
                   image: foodItems[i]['image']!,
                   label: foodItems[i]['label']!,
                   isSelected: selectedCircles.contains(i),
                 ),
+              ),
+            ),
+
+          if (isHandMoving)
+            Positioned(
+              left: 160 + 150 * cos((currentCircleIndex * 45) * (3.14159 / 180)) / 1.15,
+              top: 165 - 150 * sin((currentCircleIndex * 45) * (3.14159 / 180)) / 1.15,
+              child: Image.asset(
+                'assets/hand.png',
+                width: 60,
+                height: 60,
               ),
             ),
 
@@ -167,7 +218,17 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                   _buildBetSelector(),
                 ],
               )
-          )
+          ),
+
+          // Positioned(
+          //     top: 500,
+          //     child: Row(
+          //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //       children: [
+          //         _buildResultRow()
+          //       ],
+          //     )
+          // )
         ],
       ),
     );
@@ -180,7 +241,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [100, 1000, 5000, 10000].map((amount) {
+            children: [10, 50, 100, 1000].map((amount) {
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -232,7 +293,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           alignment: Alignment.center,
           children: [
             Positioned(
-              top: 15,
+              top: 12,
               child: Image.asset(
                 image,
                 width: 37,
@@ -242,13 +303,13 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ),
 
             Positioned(
-              bottom: 9,
+              bottom: 16,
               child: Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -261,8 +322,8 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   Widget _buildBetButton(int amount) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 3.5),
-      width: 62,
-      height: 53,
+      width: 65,
+      height: 54,
       decoration: BoxDecoration(
         color: selectedBet == amount ? Colors.red : Colors.blue.shade400,
         borderRadius: BorderRadius.circular(10),
@@ -301,14 +362,23 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildResultRow() {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(20),
       margin: EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.lightBlue,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.black,
+              Colors.black38,
+              Colors.black26,
+              Colors.black,
+            ],
+          ),
         borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.shade500.withOpacity(0.6),
+              color: Colors.blue.shade600.withOpacity(0.6),
               blurRadius: 0,
               spreadRadius: 1,
               offset: Offset(0, 4),
@@ -321,6 +391,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           const Text(
             'RESULTS |',
             style: TextStyle(
+                fontSize: 14,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
             ),
@@ -330,16 +401,17 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             children: List.generate(
               7,
                   (index) => Container(
-                width: 34,
-                height: 34,
+                width: 35,
+                height: 35,
                 margin: EdgeInsets.symmetric(horizontal: 2),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
                 child: index == 0
-                    ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
-                    : Icon(Icons.fastfood, size: 16),
+                    // ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
+                    ? Image.asset('assets/hot-dog.png',scale: 20)
+                    : Image.asset('assets/hot-dog.png',scale: 20),
               ),
             ),
           ),
@@ -356,9 +428,10 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.lightBlueAccent,
-            Colors.lightBlueAccent.shade400,
-            Colors.lightBlueAccent.shade700,
+            Colors.black,
+            Colors.black38,
+            Colors.black26,
+            Colors.black,
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -380,30 +453,30 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ],
           ),
 
-          SizedBox(height: 20),
+          // SizedBox(height: 20),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: List.generate(
-                  8,
-                      (index) => Container(
-                    width: 35,
-                    height: 35,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: index == 0
-                        ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
-                        : Icon(Icons.fastfood, size: 16),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     Row(
+          //       children: List.generate(
+          //         8,
+          //             (index) => Container(
+          //           width: 35,
+          //           height: 35,
+          //           margin: const EdgeInsets.symmetric(horizontal: 4),
+          //           decoration: const BoxDecoration(
+          //             color: Colors.white,
+          //             shape: BoxShape.circle,
+          //           ),
+          //           child: index == 0
+          //               ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
+          //               : Icon(Icons.fastfood, size: 16),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

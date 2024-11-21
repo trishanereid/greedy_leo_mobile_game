@@ -6,23 +6,29 @@ class SemiFilledCirclePainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 5;
 
-    final gradient = RadialGradient(
-      colors: [
-        Colors.purple.shade300,
-        Colors.purple.shade600,
-        // Color(0xFF777777),
-        // Color(0xFF696969),
-      ],
-      stops: [0.3, 0.9],
-    );
+    final strokePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawCircle(center, radius, strokePaint);
 
     final whiteCirclePaint = Paint()
-      ..shader = gradient.createShader(Rect.fromCircle(
-          center: center,
-          radius: radius)
-      );
-
+      ..color = Colors.white;
     canvas.drawCircle(center, radius, whiteCirclePaint);
+
+    final yellowPaint = Paint()..color = Colors.yellow.shade300;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawArc(rect, 0, 3.14159, true, yellowPaint);
+
+    final blackLinePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.7;
+    canvas.drawLine(
+      Offset(center.dx - radius, center.dy),
+      Offset(center.dx + radius, center.dy),
+      blackLinePaint,
+    );
   }
 
   @override
