@@ -25,8 +25,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int currentCircleIndex = 0;
   Timer? handTimer;
   bool isHandMoving = false;
-
-
+  int timeRemaining = 30;
+  bool isScreenTransitionActive = false;
+  Timer? screenTransitionTimer;
 
   final List<Map<String, String>> foodItems = [
     {'image': 'assets/leg-piece.png', 'label': '25 Times'},
@@ -41,7 +42,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Set<int> selectedCircles = {};
 
-  // Method to toggle circle selection
+
   void toggleSelection(int index) {
     setState(() {
       if (selectedCircles.contains(index)) {
@@ -56,20 +57,44 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     if (isHandMoving) return;
     setState(() {
       isHandMoving = true;
+      timeRemaining = 30;
     });
 
     handTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         currentCircleIndex = (currentCircleIndex + 1) % foodItems.length;
+        timeRemaining--;
       });
 
-      // Stop after 30 seconds
-      if (timer.tick >= 30) {
+
+      if (timeRemaining <= 0) {
         timer.cancel();
         setState(() {
           isHandMoving = false;
+          triggerScreenTransition();
         });
       }
+    });
+  }
+
+  void triggerScreenTransition() {
+    setState(() {
+      isScreenTransitionActive = true;
+    });
+
+    screenTransitionTimer = Timer(const Duration(seconds: 5), () {
+      setState(() {
+        isScreenTransitionActive = false;
+        resetGame();
+      });
+    });
+  }
+
+  void resetGame() {
+    setState(() {
+      currentCircleIndex = 0;
+      selectedCircles.clear();
+      startHandMovement();
     });
   }
 
@@ -82,47 +107,67 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   @override
   void initState() {
     super.initState();
-    startHandMovement(); // Trigger hand movement when the app starts
+    startHandMovement();
   }
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/background.png'),
-            alignment: Alignment(0, -0.3),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/background.png'),
+                alignment: Alignment(0, -0.3),
+                fit: BoxFit.cover,
+              ),
+
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1a2635),
+                  Color(0xFF0d1219)],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildTopBar(),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildFoodWheel(),
+                        _buildResultRow()
+                      ],
+                    ),
+                  ),
+                  _buildBalanceRow(),
+                ],
+              ),
+            ),
           ),
 
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1a2635),
-              Color(0xFF0d1219)],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildTopBar(),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildFoodWheel(),
-                    _buildResultRow()
-                  ],
+          if (isScreenTransitionActive)
+            Container(
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: Text(
+                  'Please Wait...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              _buildBalanceRow(),
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
+
     );
   }
 
@@ -182,6 +227,38 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               width: 360,
               height: 535,
               fit: BoxFit.contain,
+          ),
+
+          Positioned(
+            left: 150,
+            top: 155,
+            child: Container(
+              width: 60,
+              alignment: Alignment.center,
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'PLEASE BET\n',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '$timeRemaining',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
 
           for (int i = 0; i < foodItems.length; i++)
