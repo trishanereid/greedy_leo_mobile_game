@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'SemiFilledCirclePainter.dart';
 import 'betting_history_screen.dart';
+import 'game_rules_screen.dart';
 
 void main() {
   runApp(
@@ -223,7 +224,10 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                 Icons.help_outline_rounded,
                 Colors.cyan,
                 onTap: () {
-                  print("Help button clicked!");
+                  Navigator.push(
+                    context,
+                      MaterialPageRoute(builder: (context) => GameRulesScreen())
+                  );
                 },
               ),
             ],
