@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class BettingHistoryScreen extends StatelessWidget {
+class BettingHistoryScreen extends StatefulWidget {
 
+  @override
+  State<BettingHistoryScreen> createState() => _BettingHistoryScreenState();
+}
+
+class _BettingHistoryScreenState extends State<BettingHistoryScreen> {
   DateTime selectedDate = DateTime.now();
 
   final List<Map<String, dynamic>> historyData = [
@@ -127,9 +132,6 @@ class BettingHistoryScreen extends StatelessWidget {
   String getFormattedDate(DateTime date) {
     return DateFormat('MMM, dd yyyy').format(date);
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
