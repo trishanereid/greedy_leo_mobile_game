@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'SemiFilledCirclePainter.dart';
+import 'betting_history_screen.dart';
 
 void main() {
   runApp(
@@ -167,9 +168,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ),
         ],
       ),
-
     );
   }
+
 
   Widget _buildTopBar() {
     return Padding(
@@ -179,9 +180,20 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         children: [
           Row(
             children: [
-              _buildCircularButton(Icons.emoji_events, Colors.cyan),
+              _buildCircularButton(
+                  Icons.emoji_events,
+                  Colors.cyan,
+                  onTap: () {
+                    print("Help button clicked!");
+                  }
+              ),
               const SizedBox(width: 5),
-              _buildCircularButton(Icons.music_off_outlined, Colors.cyan),
+              _buildCircularButton(
+                  Icons.music_off_outlined,
+                  Colors.cyan,
+                  onTap: () {
+                    print("Help button clicked!");
+                  }),
             ],
           ),
 
@@ -196,25 +208,44 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
           Row(
             children: [
-              _buildCircularButton(Icons.menu, Colors.cyan),
+              _buildCircularButton(
+                Icons.menu,
+                Colors.cyan,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => BettingHistoryScreen()),
+                  );
+                },
+              ),
               const SizedBox(width: 5),
-              _buildCircularButton(Icons.help_outline_rounded, Colors.cyan),
+              _buildCircularButton(
+                Icons.help_outline_rounded,
+                Colors.cyan,
+                onTap: () {
+                  print("Help button clicked!");
+                },
+              ),
             ],
           ),
+
         ],
       ),
     );
   }
 
-  Widget _buildCircularButton(IconData icon, Color color) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
+  Widget _buildCircularButton(IconData icon, Color color, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white),
       ),
-      child: Icon(icon, color: Colors.white),
     );
   }
 
