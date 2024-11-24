@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'SemiFilledCirclePainter.dart';
 import 'betting_history_screen.dart';
 import 'game_rules_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
+
+import 'leaderboard_screen.dart';
+
 
 void main() {
   runApp(
@@ -30,6 +34,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int timeRemaining = 30;
   bool isScreenTransitionActive = false;
   Timer? screenTransitionTimer;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool isMuted = false;
 
   final List<Map<String, String>> foodItems = [
     {'image': 'assets/leg-piece.png', 'label': '25 Times'},
@@ -110,6 +117,22 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   void initState() {
     super.initState();
     startHandMovement();
+    _playBackgroundMusic();
+  }
+
+  Future<void> _playBackgroundMusic() async {
+    try {
+      await _audioPlayer.play(AssetSource('assets/audio/backgroundmusic.mp3'));
+    } catch (e) {
+      print("Error playing audio: $e");
+    }
+  }
+
+  void _toggleMute() {
+    setState(() {
+      isMuted = !isMuted;
+    });
+    _audioPlayer.setVolume(isMuted ? 0.0 : 1.0);
   }
 
 
@@ -185,15 +208,18 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                   Icons.emoji_events,
                   Colors.cyan,
                   onTap: () {
-                    print("Help button clicked!");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LeaderboardScreen()),
+                    );
                   }
               ),
               const SizedBox(width: 5),
               _buildCircularButton(
-                  Icons.music_off_outlined,
+                  isMuted ? Icons.music_off_outlined : Icons.music_note_outlined,
                   Colors.cyan,
                   onTap: () {
-                    print("Help button clicked!");
+                    _toggleMute;
                   }),
             ],
           ),
