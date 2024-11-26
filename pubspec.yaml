@@ -1,4 +1,4 @@
-name: greedy_leo
+name: Greedyleo
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -45,7 +45,7 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: "launcher_icon"
-  image_path: "assets/diamond.png"
+  image_path: "assets/app_icon.png"
   min_sdk_android: 21
 
   # The "flutter_lints" package below contains a set of recommended lints to

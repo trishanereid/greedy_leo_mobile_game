@@ -217,7 +217,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0), // 16,10
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // 16,10
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -277,7 +277,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               ),
             ],
           ),
-
         ],
       ),
     );
@@ -381,7 +380,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ),
 
           Positioned(
-            bottom: screenHeight * 0.042,
+            bottom: screenHeight * 0.029,
             left: screenWidth * 0,
             right: screenWidth * 0,
             child: Row(
