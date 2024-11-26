@@ -138,53 +138,72 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/background.png'),
                 alignment: Alignment(0, -0.3),
                 fit: BoxFit.cover,
               ),
-
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
                   Color(0xFF1a2635),
-                  Color(0xFF0d1219)],
+                  Color(0xFF0d1219),
+                ],
               ),
             ),
             child: SafeArea(
               child: Column(
                 children: [
-                  _buildTopBar(),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.02,
+                      vertical: screenHeight * 0,
+                    ),
+                    child: _buildTopBar(),
+                  ),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildFoodWheel(),
-                        _buildResultRow()
+                        _buildFoodWheel(context),
+                        Transform.translate(
+                          offset: Offset(0, screenHeight * 0.015),
+                          child: _buildResultRow(context),
+                        ),
                       ],
                     ),
                   ),
-                  _buildBalanceRow(),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: screenHeight * 0,
+                    ),
+                    child: _buildBalanceRow(),
+                  ),
                 ],
               ),
             ),
           ),
 
+          // Overlay for Screen Transition
           if (isScreenTransitionActive)
             Container(
               color: Colors.black.withOpacity(0.5),
-              child: const Center(
+              child: Center(
                 child: Text(
                   'Please Wait...',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: screenWidth * 0.06,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -198,7 +217,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0), // 16,10
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -279,22 +298,26 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     );
   }
 
-  Widget _buildFoodWheel() {
+  Widget _buildFoodWheel(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Center(
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          const Image(
-              image: AssetImage('assets/stand-without-circles.png'),
-              width: 360,
-              height: 535,
-              fit: BoxFit.contain,
+          Image(
+            image: const AssetImage('assets/stand-without-circles.png'),
+            width: screenWidth * 1.0,
+            height: screenHeight * 0.63,
+            fit: BoxFit.contain,
           ),
 
           Positioned(
-            left: 150,
-            top: 155,
+            left: screenWidth * 0.415,
+            top: screenHeight * 0.17,
             child: Container(
-              width: 60,
+              width: screenWidth * 0.17,
               alignment: Alignment.center,
               child: RichText(
                 textAlign: TextAlign.center,
@@ -304,7 +327,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                       text: 'PLEASE BET\n',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: screenWidth * 0.026,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -312,7 +335,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                       text: '$timeRemaining',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: screenWidth * 0.08,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -324,12 +347,14 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
 
           for (int i = 0; i < foodItems.length; i++)
             Positioned(
-              left: 138 + 150 * cos((i * 45) * (3.14159 / 180)) / 1.15,
-              top: 128 - 150 * sin((i * 45) * (3.14159 / 180)) / 1.15,
+              left: screenWidth * 0.395 +
+                  (screenWidth * 0.4 * cos((i * 45) * (3.14159 / 180)) / 1.15),
+              top: screenHeight * 0.129 -
+                  (screenWidth * 0.4 * sin((i * 45) * (3.14159 / 180)) / 1.15),
               child: GestureDetector(
                 onTap: () => toggleSelection(i),
                 child: _semiFilledCircle(
-                  size: 82,
+                  size: screenWidth * 0.22,
                   image: foodItems[i]['image']!,
                   label: foodItems[i]['label']!,
                   isSelected: selectedCircles.contains(i),
@@ -337,44 +362,48 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               ),
             ),
 
+
           if (isHandMoving)
             Positioned(
-              left: 160 + 150 * cos((currentCircleIndex * 45) * (3.14159 / 180)) / 1.15,
-              top: 165 - 150 * sin((currentCircleIndex * 45) * (3.14159 / 180)) / 1.15,
+              left: screenWidth * 0.45 +
+                  (screenWidth * 0.4 *
+                      cos((currentCircleIndex * 45) * (3.14159 / 180)) /
+                      1.15),
+              top: screenHeight * 0.18 -
+                  (screenWidth * 0.4 *
+                      sin((currentCircleIndex * 45) * (3.14159 / 180)) /
+                      1.15),
               child: Image.asset(
                 'assets/hand.png',
-                width: 60,
-                height: 60,
+                width: screenWidth * 0.15,
+                height: screenWidth * 0.15,
               ),
             ),
 
           Positioned(
-              bottom: 55,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildBetSelector(),
-                ],
-              )
+            bottom: screenHeight * 0.042,
+            left: screenWidth * 0,
+            right: screenWidth * 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildBetSelector(context),
+              ],
+            ),
           ),
-
-          // Positioned(
-          //     top: 500,
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //       children: [
-          //         _buildResultRow()
-          //       ],
-          //     )
-          // )
         ],
       ),
     );
   }
 
-  Widget _buildBetSelector() {
+
+  Widget _buildBetSelector(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 38),
+
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
       child: Column(
         children: [
           Row(
@@ -386,7 +415,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                     selectedBet = amount;
                   });
                 },
-                child: _buildBetButton(amount),
+                child: _buildBetButton(amount, screenWidth, screenHeight),
               );
             }).toList(),
           ),
@@ -395,7 +424,47 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     );
   }
 
-  // food circle
+  Widget _buildBetButton(int amount, double screenWidth, double screenHeight) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.009),
+      width: screenWidth * 0.18,
+      height: screenHeight * 0.07,
+      decoration: BoxDecoration(
+        color: selectedBet == amount ? Colors.red : Colors.blue.shade400,
+        borderRadius: BorderRadius.circular(screenWidth * 0.02), // Adjust radius
+        boxShadow: [
+          BoxShadow(
+            color: selectedBet == amount
+                ? Colors.red.shade900
+                : Colors.blue.shade500.withOpacity(0.6),
+            blurRadius: 0,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Image(
+              image: AssetImage('assets/diamond.png'),
+              height: 30, // Keep asset height fixed
+            ),
+            Text(
+              '$amount',
+              style: TextStyle(
+                fontSize: screenWidth * 0.04, // Responsive font size
+                color: const Color(0xFFFFD700),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _semiFilledCircle({
     required double size,
     required String image,
@@ -409,7 +478,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: isSelected
-              ? [Colors.lightGreenAccent.shade200, Colors.lightGreenAccent.shade400]
+              ? [Colors.red, Colors.red]
               : [Colors.blue.shade600, Colors.blue.shade300],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -417,7 +486,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         boxShadow: [
           BoxShadow(
             color: isSelected
-                ? Colors.green.shade500
+                ? Colors.red.shade900
                 : Colors.blue.shade800,
             blurRadius: 0,
             spreadRadius: 1,
@@ -457,99 +526,67 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     );
   }
 
-  Widget _buildBetButton(int amount) {
+
+  Widget _buildResultRow(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3.5),
-      width: 65,
-      height: 54,
+      padding: EdgeInsets.all(screenWidth * 0.033),
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
       decoration: BoxDecoration(
-        color: selectedBet == amount ? Colors.red : Colors.blue.shade400,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: selectedBet == amount
-                ? Colors.red.shade900
-                : Colors.blue.shade500.withOpacity(0.6),
-            blurRadius: 0,
-            spreadRadius: 1,
-            offset: Offset(0, 4),
-          )
-        ]
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Image(
-              image: AssetImage('assets/diamond.png'),
-              height: 30,
-            ),
-            Text(
-              '$amount',
-              style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-              ),
-            ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.black,
+            Colors.black38,
+            Colors.black26,
+            Colors.black,
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildResultRow() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.black,
-              Colors.black38,
-              Colors.black26,
-              Colors.black,
-            ],
+        borderRadius: BorderRadius.circular(screenWidth * 0.03),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.shade600.withOpacity(0.6),
+            blurRadius: 0,
+            spreadRadius: 1,
+            offset: Offset(0, screenHeight * 0.005),
           ),
-        borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.shade600.withOpacity(0.6),
-              blurRadius: 0,
-              spreadRadius: 1,
-              offset: Offset(0, 4),
-            )
-          ]
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'RESULTS |',
             style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+              fontSize: screenWidth * 0.04,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(width: 8),
+          SizedBox(width: screenWidth * 0.02),
           Row(
             children: List.generate(
               7,
                   (index) => Container(
-                width: 35,
-                height: 35,
-                margin: EdgeInsets.symmetric(horizontal: 2),
+                width: screenWidth * 0.08,
+                height: screenWidth * 0.08,
+                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.005),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
                 child: index == 0
-                    // ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
-                    ? Image.asset('assets/hot-dog.png',scale: 20)
-                    : Image.asset('assets/hot-dog.png',scale: 20),
+                    ? Image.asset(
+                  'assets/hot-dog.png',
+                  scale: screenWidth * 0.05,
+                )
+                    : Image.asset(
+                  'assets/hot-dog.png',
+                  scale: screenWidth * 0.05,
+                ),
               ),
             ),
           ),
@@ -590,31 +627,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               _buildBalanceDisplay('WIN', winAmount),
             ],
           ),
-
-          // SizedBox(height: 20),
-
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: [
-          //     Row(
-          //       children: List.generate(
-          //         8,
-          //             (index) => Container(
-          //           width: 35,
-          //           height: 35,
-          //           margin: const EdgeInsets.symmetric(horizontal: 4),
-          //           decoration: const BoxDecoration(
-          //             color: Colors.white,
-          //             shape: BoxShape.circle,
-          //           ),
-          //           child: index == 0
-          //               ? Center(child: Text('NEW', style: TextStyle(fontSize: 8)))
-          //               : Icon(Icons.fastfood, size: 16),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
         ],
       ),
     );
