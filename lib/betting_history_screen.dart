@@ -14,21 +14,18 @@ class _BettingHistoryScreenState extends State<BettingHistoryScreen> {
     {
       'round': 1945,
       'playAmount': '500',
-      'currency': 'silver',
       'status': 'Missed',
       'time': 'Nov,18 2024 21:36',
     },
     {
       'round': 1943,
       'playAmount': '150',
-      'currency': 'gold',
       'status': 'Missed',
       'time': 'Nov,18 2024 21:35',
     },
     {
       'round': 1942,
       'playAmount': '1000',
-      'currency': 'silver',
       'status': 'Missed',
       'time': 'Nov,18 2024 21:34',
     },
@@ -235,7 +232,7 @@ class _BettingHistoryScreenState extends State<BettingHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Play: ${data['currency'] == 'gold' ? '🪙' : '💎'} ${data['playAmount']}',
+                      'Play:💎 ${data['playAmount']}',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,

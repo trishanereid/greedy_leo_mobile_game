@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:Greedyleo/websocket_service.dart';
 import 'package:flutter/material.dart';
 import 'SemiFilledCirclePainter.dart';
+import 'api_service.dart';
 import 'betting_history_screen.dart';
 import 'game_rules_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
-
 import 'leaderboard_screen.dart';
 
 
@@ -24,29 +25,33 @@ class GreedyLeoGame extends StatefulWidget {
 }
 
 class _GreedyLeoGameState extends State<GreedyLeoGame> {
+  final ApiService _apiService = ApiService();
+  int balance = 0;
   int selectedBet = 16;
-  int balance = 1000;
   int winAmount = 10000;
-
   int currentCircleIndex = 0;
   Timer? handTimer;
   bool isHandMoving = false;
   int timeRemaining = 30;
   bool isScreenTransitionActive = false;
   Timer? screenTransitionTimer;
-
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool isMuted = false;
+  String connectionStatus = "Disconnected";
+
+  final WebSocketService _webSocketService = WebSocketService(
+      url: 'http://145.223.21.62:3020'
+  );
 
   final List<Map<String, String>> foodItems = [
-    {'image': 'assets/leg-piece.png', 'label': '25 Times'},
-    {'image': 'assets/tuna.png', 'label': '15 Times'},
-    {'image': 'assets/hot-dog.png', 'label': '10 Times'},
-    {'image': 'assets/tomato.png', 'label': '5 Times'},
-    {'image': 'assets/cabbage.png', 'label': '5 Times'},
-    {'image': 'assets/corn.png', 'label': '5 Times'},
-    {'image': 'assets/carrot.png', 'label': '5 Times'},
-    {'image': 'assets/beef.png', 'label': '45 Times'},
+    {'image': 'assets/leg-piece.png', 'label': '25 Times', 'value': '25'},
+    {'image': 'assets/tuna.png', 'label': '15 Times', 'value': '15'},
+    {'image': 'assets/hot-dog.png', 'label': '10 Times', 'value': '10'},
+    {'image': 'assets/tomato.png', 'label': '5 Times', 'value': '5'},
+    {'image': 'assets/cabbage.png', 'label': '5 Times', 'value': '5'},
+    {'image': 'assets/corn.png', 'label': '5 Times', 'value': '5'},
+    {'image': 'assets/carrot.png', 'label': '5 Times', 'value': '5'},
+    {'image': 'assets/beef.png', 'label': '45 Times', 'value': '45'},
   ];
 
   Set<int> selectedCircles = {};
@@ -96,6 +101,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         isScreenTransitionActive = false;
         resetGame();
       });
+      _updateBalance();
     });
   }
 
@@ -118,6 +124,31 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     super.initState();
     startHandMovement();
     _playBackgroundMusic();
+    _fetchBalance();
+  }
+
+  Future<void> _fetchBalance() async {
+    int walletBalance = await _apiService.fetchWalletBalance();
+    setState(() {
+      balance = walletBalance;
+    });
+  }
+
+  Future<void> _updateBalance() async {
+    int newBalance = balance;
+
+    bool success = await _apiService.updateWalletBalance(newBalance);
+
+    if (success) {
+      setState(() {
+        balance = newBalance;
+        print(balance);
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update wallet balance')),
+      );
+    }
   }
 
   Future<void> _playBackgroundMusic() async {
