@@ -45,6 +45,8 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int currentRoundNumber = 0;
   String status = 'Disconnected';
   List<Map<String, dynamic>> gameHistory = [];
+  String winingItem = '';
+  List<String> winningItems = [];
 
 
   final List<Map<String, String>> foodItems = [
@@ -59,7 +61,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   ];
 
   Set<int> selectedCircles = {};
-
 
   void toggleSelection(int index) {
     setState(() {
@@ -96,7 +97,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     });
 
     screenTransitionTimer = Timer(const Duration(seconds: 6), () {
-      showGameResult(context, round);
+      showGameResult(context, round, winingItem);
       setState(() {
         isScreenTransitionActive = false;
         resetGame();
@@ -149,9 +150,10 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     socket.on('roundEnd', (data) {
       setState(() {
         isHandMoving = false;
+        winingItem = foodItems[data['number']]['image']!;
         triggerScreenTransition();
+        addWinningItem(winingItem);
       });
-      print(data['number']);
     });
 
     socket.on('newRound', (data) {
@@ -189,7 +191,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     if (success) {
       setState(() {
         balance = newBalance;
-        print(balance);
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,6 +205,13 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     } catch (e) {
       print("Error playing audio: $e");
     }
+  }
+
+  void addWinningItem(String newItem) {
+    if (winningItems.length > 7) {
+      winningItems.removeAt(0);
+    }
+    winningItems.add(newItem);
   }
 
   void _toggleMute() {
@@ -275,7 +283,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           // Overlay for Screen Transition
           if (isScreenTransitionActive)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.9),
               child: Center(
                 child: Text(
                   'Please Wait...',
@@ -671,24 +679,24 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
           Row(
             children: List.generate(
               7,
-                  (index) => Container(
-                width: screenWidth * 0.08,
-                height: screenWidth * 0.08,
-                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.005),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: index == 0
-                    ? Image.asset(
-                  'assets/hot-dog.png',
-                  scale: screenWidth * 0.05,
-                )
-                    : Image.asset(
-                  'assets/hot-dog.png',
-                  scale: screenWidth * 0.05,
-                ),
-              ),
+                  (index) {
+                bool hasWinningItem = index < winningItems.length;
+                return Container(
+                  width: screenWidth * 0.08,
+                  height: screenWidth * 0.08,
+                  margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.005),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: hasWinningItem
+                      ? Image.asset(
+                    winningItems[index],
+                    scale: screenWidth * 0.05,
+                  )
+                      : null,
+                );
+              },
             ),
           ),
         ],

@@ -260,7 +260,7 @@ class SpendingDetail {
   });
 }
 
-void showGameResult(BuildContext context, int round) {
+void showGameResult(BuildContext context, int round, winningItem) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -269,7 +269,7 @@ void showGameResult(BuildContext context, int round) {
       roundNumber: round,
       spending: 0,
       earnings: 0,
-      topFoodImage: 'assets/cabbage.png',
+      topFoodImage: '$winningItem',
       spendingDetails: [
         SpendingDetail(imagePath: 'assets/carrot.png', amount: 150),
         SpendingDetail(imagePath: 'assets/corn.png', amount: 400),
