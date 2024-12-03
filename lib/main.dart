@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:Greedyleo/websocket_service.dart';
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'SemiFilledCirclePainter.dart';
 import 'api_service.dart';
 import 'betting_history_screen.dart';
@@ -32,16 +33,18 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   int currentCircleIndex = 0;
   Timer? handTimer;
   bool isHandMoving = false;
-  int timeRemaining = 30;
+  int timeRemaining = 0;
+  int round = 0;
+  late IO.Socket socket;
   bool isScreenTransitionActive = false;
   Timer? screenTransitionTimer;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool isMuted = false;
   String connectionStatus = "Disconnected";
+  int currentRoundNumber = 0;
+  String status = 'Disconnected';
+  List<Map<String, dynamic>> gameHistory = [];
 
-  final WebSocketService _webSocketService = WebSocketService(
-      url: 'http://145.223.21.62:3020'
-  );
 
   final List<Map<String, String>> foodItems = [
     {'image': 'assets/leg-piece.png', 'label': '25 Times', 'value': '25'},
@@ -71,16 +74,12 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     if (isHandMoving) return;
     setState(() {
       isHandMoving = true;
-      timeRemaining = 30;
     });
 
     handTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         currentCircleIndex = (currentCircleIndex + 1) % foodItems.length;
-        timeRemaining--;
       });
-
-
       if (timeRemaining <= 0) {
         timer.cancel();
         setState(() {
@@ -102,6 +101,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         resetGame();
       });
       _updateBalance();
+      print(currentRoundNumber);
     });
   }
 
@@ -116,15 +116,50 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   @override
   void dispose() {
     handTimer?.cancel();
+    // _webSocketService.close();
+    socket.disconnect();
+    socket.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    connectToServer();
     startHandMovement();
     _playBackgroundMusic();
     _fetchBalance();
+  }
+
+  void connectToServer() {
+    socket = IO.io('http://145.223.21.62:3020', {
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+    
+    socket.connect();
+
+    // Listen for the timeUpdate event
+    socket.on('timeUpdate', (data) {
+      setState(() {
+        timeRemaining = data['timeRemaining'];
+        round = data['roundNumber'];
+      });
+    });
+
+
+    // Handle connection events
+    socket.onConnect((_) {
+      print('Connected to WebSocket server');
+    });
+
+    socket.onDisconnect((_) {
+      print('Disconnected from WebSocket server');
+    });
+
+    socket.onError((err) {
+      print('Error connecting to WebSocket server: $err');
+    });
   }
 
   Future<void> _fetchBalance() async {
@@ -411,6 +446,13 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
             ),
 
           Positioned(
+            bottom: screenHeight * 0.09,
+            left: screenWidth * 0.1,
+            right: screenWidth * 0.1,
+            child: _showRoundNumber(context),
+          ),
+
+          Positioned(
             bottom: screenHeight * 0.029,
             left: screenWidth * 0,
             right: screenWidth * 0,
@@ -426,6 +468,23 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     );
   }
 
+  Widget _showRoundNumber(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      alignment: Alignment.center,
+      child: Text(
+        '$round Round',
+        style: TextStyle(
+          // color: const Color(0xFFFFD700),
+          color: Colors.black,
+          fontSize: screenWidth * 0.05,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
 
   Widget _buildBetSelector(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
