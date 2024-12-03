@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:Greedyleo/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -84,7 +85,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         timer.cancel();
         setState(() {
           isHandMoving = false;
-          triggerScreenTransition();
         });
       }
     });
@@ -95,13 +95,13 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       isScreenTransitionActive = true;
     });
 
-    screenTransitionTimer = Timer(const Duration(seconds: 5), () {
+    screenTransitionTimer = Timer(const Duration(seconds: 6), () {
+      showGameResult(context, round);
       setState(() {
         isScreenTransitionActive = false;
         resetGame();
       });
       _updateBalance();
-      print(currentRoundNumber);
     });
   }
 
@@ -109,14 +109,13 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     setState(() {
       currentCircleIndex = 0;
       selectedCircles.clear();
-      startHandMovement();
+      // startHandMovement();
     });
   }
 
   @override
   void dispose() {
-    handTimer?.cancel();
-    // _webSocketService.close();
+    // handTimer?.cancel();
     socket.disconnect();
     socket.dispose();
     super.dispose();
@@ -126,7 +125,6 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   void initState() {
     super.initState();
     connectToServer();
-    startHandMovement();
     _playBackgroundMusic();
     _fetchBalance();
   }
@@ -138,6 +136,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     });
     
     socket.connect();
+    //startHandMovement();
 
     // Listen for the timeUpdate event
     socket.on('timeUpdate', (data) {
@@ -147,6 +146,19 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       });
     });
 
+    socket.on('roundEnd', (data) {
+      setState(() {
+        isHandMoving = false;
+        triggerScreenTransition();
+      });
+      print(data['number']);
+    });
+
+    socket.on('newRound', (data) {
+      setState(() {
+        startHandMovement();
+      });
+    });
 
     // Handle connection events
     socket.onConnect((_) {
@@ -477,7 +489,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
         '$round Round',
         style: TextStyle(
           // color: const Color(0xFFFFD700),
-          color: Colors.black,
+          color: Colors.white,
           fontSize: screenWidth * 0.05,
           fontWeight: FontWeight.bold,
         ),
