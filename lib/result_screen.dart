@@ -260,22 +260,29 @@ class SpendingDetail {
   });
 }
 
-void showGameResult(BuildContext context, int round, winningItem) {
+void showGameResult(BuildContext context, int round, winningItem, Set<int> selectedCircles, List<Map<String, String>> foodItems, int betAmount, int winnings) {
+
+  List<SpendingDetail> spendingDetails = selectedCircles.map((index) {
+    String imagePath = foodItems[index]['image']!;
+
+    return SpendingDetail(
+      imagePath: imagePath,
+      amount: winnings,
+    );
+  }).toList();
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) => GameResultScreen(
       roundNumber: round,
-      spending: 0,
+      spending: betAmount,
       earnings: 0,
       topFoodImage: '$winningItem',
-      spendingDetails: [
-        SpendingDetail(imagePath: 'assets/carrot.png', amount: 150),
-        SpendingDetail(imagePath: 'assets/corn.png', amount: 400),
-        SpendingDetail(imagePath: 'assets/cabbage.png', amount: 400),
-        SpendingDetail(imagePath: 'assets/beef.png', amount: 50),
-      ],
+      spendingDetails: spendingDetails
     ),
   );
+  print("selected items: $selectedCircles.");
+  print(foodItems);
 }

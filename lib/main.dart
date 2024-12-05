@@ -29,8 +29,8 @@ class GreedyLeoGame extends StatefulWidget {
 class _GreedyLeoGameState extends State<GreedyLeoGame> {
   final ApiService _apiService = ApiService();
   int balance = 0;
-  int selectedBet = 16;
-  int winAmount = 10000;
+  int betAmount = 0;
+  int winAmount = 0;
   int currentCircleIndex = 0;
   Timer? handTimer;
   bool isHandMoving = false;
@@ -46,7 +46,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
   String status = 'Disconnected';
   List<Map<String, dynamic>> gameHistory = [];
   String winingItem = '';
+  int winingItemForCalculateBet = 0;
   List<String> winningItems = [];
+  int winnings = 0;
 
 
   final List<Map<String, String>> foodItems = [
@@ -66,8 +68,10 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     setState(() {
       if (selectedCircles.contains(index)) {
         selectedCircles.remove(index);
+        print(selectedCircles);
       } else if (selectedCircles.length < 6) {
         selectedCircles.add(index);
+        print(selectedCircles);
       }
     });
   }
@@ -97,7 +101,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     });
 
     screenTransitionTimer = Timer(const Duration(seconds: 6), () {
-      showGameResult(context, round, winingItem);
+      showGameResult(context, round, winingItem, selectedCircles, foodItems, betAmount, winnings);
       setState(() {
         isScreenTransitionActive = false;
         resetGame();
@@ -106,11 +110,39 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
     });
   }
 
+  void resolveBet() {
+    if (betAmount == 0 || selectedCircles.isEmpty) {
+      print("Please place a bet and select at least one item.");
+      return;
+    }
+
+    List<int> foodValues = [2, 3, 5, 10, 7, 4];
+    print("Winning item is: $winingItemForCalculateBet");
+    int value = int.parse(foodItems[1]['value']!);
+
+
+    if (selectedCircles.contains(winingItemForCalculateBet)) {
+      winnings = betAmount * value;
+      setState(() {
+        winAmount = winnings;
+        balance += winnings;
+      });
+      print("You win! Winnings: $winnings");
+    } else {
+      setState(() {
+        balance -= betAmount * selectedCircles.length;
+      });
+      print("You lose! Better luck next time.");
+    }
+
+    // betAmount = 0;
+  }
+
+
   void resetGame() {
     setState(() {
       currentCircleIndex = 0;
       selectedCircles.clear();
-      // startHandMovement();
     });
   }
 
@@ -135,7 +167,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       'transports': ['websocket'],
       'autoConnect': false,
     });
-    
+
     socket.connect();
     //startHandMovement();
 
@@ -151,7 +183,9 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       setState(() {
         isHandMoving = false;
         winingItem = foodItems[data['number']]['image']!;
+        winingItemForCalculateBet = data['number'];
         triggerScreenTransition();
+        resolveBet();
         addWinningItem(winingItem);
       });
     });
@@ -521,7 +555,8 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    selectedBet = amount;
+                    betAmount = amount;
+                    print(betAmount);
                   });
                 },
                 child: _buildBetButton(amount, screenWidth, screenHeight),
@@ -539,11 +574,11 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
       width: screenWidth * 0.18,
       height: screenHeight * 0.07,
       decoration: BoxDecoration(
-        color: selectedBet == amount ? Colors.red : Colors.blue.shade400,
-        borderRadius: BorderRadius.circular(screenWidth * 0.02), // Adjust radius
+        color: betAmount == amount ? Colors.red : Colors.blue.shade400,
+        borderRadius: BorderRadius.circular(screenWidth * 0.02),
         boxShadow: [
           BoxShadow(
-            color: selectedBet == amount
+            color: betAmount == amount
                 ? Colors.red.shade900
                 : Colors.blue.shade500.withOpacity(0.6),
             blurRadius: 0,
