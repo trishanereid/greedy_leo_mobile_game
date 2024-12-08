@@ -320,7 +320,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
               color: Colors.black.withOpacity(0.9),
               child: Center(
                 child: Text(
-                  'Please Wait...',
+                  ' ',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: screenWidth * 0.06,
@@ -488,7 +488,7 @@ class _GreedyLeoGameState extends State<GreedyLeoGame> {
                   (screenWidth * 0.4 *
                       cos((currentCircleIndex * 45) * (3.14159 / 180)) /
                       1.15),
-              top: screenHeight * 0.18 -
+              top: screenHeight * 0.18 +
                   (screenWidth * 0.4 *
                       sin((currentCircleIndex * 45) * (3.14159 / 180)) /
                       1.15),
